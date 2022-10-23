@@ -10,25 +10,89 @@ import csv
 #main execution:
 def main():
     filename = sys.argv[1]
+    transDict = {}
     with open(filename) as csv_file:
         csvReader = csv.reader(csv_file, delimiter=',')
         lineNumber = 0
+        startState = []
         for line in csvReader:
             if lineNumber == 0:
                 title = line
+                print("title: ")
             elif lineNumber == 1:
                 #row that gives states in the NFA
-            elif lineNumber == 2:
-                #row that gives alphabet
+                print("all states: ")
             elif lineNumber == 3:
-                #row that gives start states
+                print("start states: ")
+                startState.append(line[0])
+                print(startState)
+                print(type(startState))
             elif lineNumber == 4:
+                print("accept states: ")
                 #row that gives accept states
-            else:
+            elif lineNumber > 4:
                 #rows that give transitions
-            #add 1 to lineNumber
+                if (line[0] + "/" + str(line[1])) not in transDict:
+                    #if key is not already in dictionary, initiallize an empty list
+                    print("initializing value with empty list for " + line[0] + str(line[1]))
+                    transDict[line[0] + "/" + str(line[1])] = []
+                #add the result to the result list
+                transDict[line[0] + "/" + str(line[1])].append(line[2])
             lineNumber += 1
+    #create a variable to store the string
+    theString = sys.argv[2]
+    print(theString)
+    print("dictionary: ")
+    print(type(transDict))
+    for key in transDict.keys():
+        print("--KEY--: " + key)
+        print("value: ", end='')
+        print(transDict[key])
+    traceNFA(transDict, startState, theString)
 
+def traceNFA(transDict, prevStates, theString):
+    #print("type of prevStates: " + str(type(prevStates)))
+    '''
+    #Can be used to trace entire tree:
+    print("Previous states ", end="")
+    print(prevStates)
+    print("remaining string: " + theString)
+    '''
+#inputs:
+    #1: dictionary containing transitions:
+        #key: start+changeChar #value: list of resulting states
+    #2: list containing previous states passed through, originally contains start state
+    #3: current string without the letters that have been accounted for
+    if not theString:
+        if (prevStates[-1])[0] == '*':
+            print("ends in accepting state: ", end='')
+            print(prevStates)
+        else:
+            print("does not end in accepting state: ", end='')
+            print(prevStates)
+        return
+    else:
+        if (str(prevStates[-1]) + "/" + theString[0]) in transDict:
+            for value in transDict[prevStates[-1] + "/" + theString[0]]:
+                #create a copy of the list object prevList:
+                newPrev = prevStates.copy()
+                alphaPrev = newPrev
+                alphaPrev.append(value)
+                traceNFA(transDict, alphaPrev, theString[1:])
+            return
+#account for epsilon:
+        if(str(prevStates[-1]) + "/" + "~") in transDict:
+            key = (str(prevStates[-1]) + "/" + "~")
+            for value in transDict[key]:
+                #create a copy of the list object prevList:
+                newPrev = prevStates.copy()
+                epsilonPrev = newPrev
+                epsilonPrev.append(value)
+                traceNFA(transDict, epsilonPrev, theString)
+            return
+        else:
+            return
+    return
 
 #run main:
 if __name__ == "__main__":
