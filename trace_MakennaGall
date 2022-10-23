@@ -5,10 +5,29 @@
 
 import time
 import sys
+import csv
+
+#main execution:
 def main():
     filename = sys.argv[1]
-    readIn(filename)
-
+    with open(filename) as csv_file:
+        csvReader = csv.reader(csv_file, delimiter=',')
+        lineNumber = 0
+        for line in csvReader:
+            if lineNumber == 0:
+                title = line
+            elif lineNumber == 1:
+                #row that gives states in the NFA
+            elif lineNumber == 2:
+                #row that gives alphabet
+            elif lineNumber == 3:
+                #row that gives start states
+            elif lineNumber == 4:
+                #row that gives accept states
+            else:
+                #rows that give transitions
+            #add 1 to lineNumber
+            lineNumber += 1
 
 
 #run main:
