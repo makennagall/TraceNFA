@@ -18,29 +18,22 @@ def main():
         for line in csvReader:
             if lineNumber == 0:
                 title = line
-                print("title: ")
-            elif lineNumber == 1:
-                #row that gives states in the NFA
-                print("all states: ")
             elif lineNumber == 3:
-                print("start states: ")
+                #create a list of start state so it can be used as initial prevStates in traceNFA
                 startState.append(line[0])
-                print(startState)
-                print(type(startState))
-            elif lineNumber == 4:
-                print("accept states: ")
-                #row that gives accept states
             elif lineNumber > 4:
                 #rows that give transitions
                 if (line[0] + "/" + str(line[1])) not in transDict:
                     #if key is not already in dictionary, initiallize an empty list
-                    print("initializing value with empty list for " + line[0] + str(line[1]))
+                    #print("initializing value with empty list for " + line[0] + str(line[1]))
                     transDict[line[0] + "/" + str(line[1])] = []
                 #add the result to the result list
                 transDict[line[0] + "/" + str(line[1])].append(line[2])
             lineNumber += 1
     #create a variable to store the string
     theString = sys.argv[2]
+    '''
+    #test values created in main:
     print(theString)
     print("dictionary: ")
     print(type(transDict))
@@ -48,6 +41,8 @@ def main():
         print("--KEY--: " + key)
         print("value: ", end='')
         print(transDict[key])
+    '''
+    #Call traceNFA in main:
     traceNFA(transDict, startState, theString)
 
 def traceNFA(transDict, prevStates, theString):
