@@ -11,13 +11,17 @@ import csv
 def main():
     filename = sys.argv[1]
     transDict = {}
+    #open output file:
+    name = filename.split(sep='.')[0]
+    writeFile = open(name + "Output", 'w')
     with open(filename) as csv_file:
         csvReader = csv.reader(csv_file, delimiter=',')
         lineNumber = 0
         startState = []
         for line in csvReader:
             if lineNumber == 0:
-                title = line
+                title = line[0]
+                writeFile.write("File: " + title + "\n")
             elif lineNumber == 3:
                 #create a list of start state so it can be used as initial prevStates in traceNFA
                 startState.append(line[0])
@@ -31,7 +35,6 @@ def main():
                 transDict[line[0] + "/" + str(line[1])].append(line[2])
             lineNumber += 1
     #create a variable to store the string
-    theString = sys.argv[2]
     '''
     #test values created in main:
     print(theString)
@@ -43,9 +46,13 @@ def main():
         print(transDict[key])
     '''
     #Call traceNFA in main:
-    traceNFA(transDict, startState, theString)
+    #create loop that allows you to input multiple strings:
+    for string in sys.argv[2:]:
+        writeFile.write("Testing String: " + string + "\n")
+        traceNFA(transDict, startState, string, writeFile)
+        writeFile.write("\n")
 
-def traceNFA(transDict, prevStates, theString):
+def traceNFA(transDict, prevStates, theString, writeFile):
     #print("type of prevStates: " + str(type(prevStates)))
     '''
     #Can be used to trace entire tree:
@@ -58,13 +65,17 @@ def traceNFA(transDict, prevStates, theString):
         #key: start+changeChar #value: list of resulting states
     #2: list containing previous states passed through, originally contains start state
     #3: current string without the letters that have been accounted for
+    #4: writeFile (does not change when recursive calls are made)
     if not theString:
         if (prevStates[-1])[0] == '*':
-            print("ends in accepting state: ", end='')
-            print(prevStates)
+            writeFile.write("ends in accepting state: ")
+            writeFile.write(", ".join(prevStates))
+            writeFile.write("\n")
         else:
-            print("does not end in accepting state: ", end='')
-            print(prevStates)
+            writeFile.write("does not end in accepting state: ")
+            writeFile.write(", ".join(prevStates))
+            writeFile.write("\n")
+
         return
     else:
         if (str(prevStates[-1]) + "/" + theString[0]) in transDict:
@@ -73,7 +84,7 @@ def traceNFA(transDict, prevStates, theString):
                 newPrev = prevStates.copy()
                 alphaPrev = newPrev
                 alphaPrev.append(value)
-                traceNFA(transDict, alphaPrev, theString[1:])
+                traceNFA(transDict, alphaPrev, theString[1:], writeFile)
             return
 #account for epsilon:
         if(str(prevStates[-1]) + "/" + "~") in transDict:
@@ -83,7 +94,7 @@ def traceNFA(transDict, prevStates, theString):
                 newPrev = prevStates.copy()
                 epsilonPrev = newPrev
                 epsilonPrev.append(value)
-                traceNFA(transDict, epsilonPrev, theString)
+                traceNFA(transDict, epsilonPrev, theString, writeFile)
             return
         else:
             return
